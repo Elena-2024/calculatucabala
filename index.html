@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Misión Cabalística</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background: #fdf9f3;
+      color: #3e2f1c;
+      background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      padding: 2em;
+      text-align: center;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 2em;
+      max-width: 900px;
+      margin: 0 auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      padding: 0.7em;
+      font-size: 1em;
+      margin: 0.5em;
+      border: 1px solid #c4b7a6;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #e8dbc7;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 1.5em;
+      text-align: left;
+    }
+    #arbol-container {
+      position: relative;
+      margin-top: 2em;
+      width: 600px;
+      height: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #arbol-svg {
+      width: 100%;
+      height: 100%;
+    }
+    .sefira {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      background-color: rgba(255,255,255,0.8);
+      padding: 4px 8px;
+      border-radius: 8px;
+      box-shadow: 0 0 3px #aaa;
+    }
+    .tooltip {
+      position: absolute;
+      background: #fff8e1;
+      border: 1px solid #d3bfa3;
+      padding: 0.5em;
+      border-radius: 6px;
+      display: none;
+      z-index: 10;
+      max-width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Misión Cabalística</h1>
+    <label>Nombre completo:</label><br>
+    <input type="text" id="nombre" placeholder="Ej: Juan Perez"><br>
+    <label>Fecha de nacimiento (DD/MM/AAAA):</label><br>
+    <input type="text" id="fecha" placeholder="19/10/1981"><br>
+    <button onclick="calcular()">Calcular mi estructura</button>
+
+    <div id="resultado" class="result"></div>
+
+    <div id="arbol-container">
+      <img id="arbol-svg" src="https://upload.wikimedia.org/wikipedia/commons/7/79/Tree_of_Life_Cabala.svg" alt="Árbol de la Vida Cabalístico">
+      <div id="sefirot"></div>
+      <div id="tooltip" class="tooltip"></div>
+    </div>
+  </div>
+
+  <script>
+    const tablaNumerica = {
+      A: 1, J: 1, S: 1, B: 2, K: 2, T: 2, C: 3, L: 3, U: 3,
+      D: 4, M: 4, V: 4, E: 5, N: 5, W: 5, F: 6, Ñ: 6, X: 6,
+      G: 7, O: 7, Y: 7, H: 8, P: 8, Z: 8, I: 9, Q: 9
+    };
+
+    const interpretaciones = {
+      Keter: "Kéter representa la corona, la conexión divina.",
+      Jojma: "Jojmá es la sabiduría pura, la chispa inicial.",
+      Bina: "Biná es entendimiento, estructura mental.",
+      Jesed: "Jesed es amor incondicional, expansión.",
+      Gebura: "Guevurá es fuerza, disciplina, límite.",
+      Tiferet: "Tiferet es belleza, armonía y equilibrio.",
+      Netzaj: "Netzaj es victoria, persistencia.",
+      Hod: "Hod es humildad, resonancia emocional.",
+      Yesod: "Yesod es fundación, subconsciente, conexión.",
+      Maljut: "Maljut es manifestación, la realidad física."
+    };
+
+    function calcularNombre(nombre) {
+      const letras = nombre.toUpperCase().replace(/[^A-ZÑ]/g, '').split('');
+      const valores = letras.map(l => tablaNumerica[l] || 0);
+      const suma = valores.reduce((acc, n) => acc + n, 0);
+      return { valores, suma };
+    }
+
+    function transformarDigito(d) {
+      const mapa = { '0': 7, '1': 6, '2': 5 };
+      return mapa[d] !== undefined ? mapa[d] : parseInt(d);
+    }
+
+    function calcular() {
+      const nombre = document.getElementById("nombre").value;
+      const fecha = document.getElementById("fecha").value;
+      const soloNumeros = fecha.replace(/[^0-9]/g, '');
+
+      const nombreCalc = calcularNombre(nombre);
+      const transformados = soloNumeros.split('').map(transformarDigito);
+      const añoOriginal = soloNumeros.slice(-4);
+      const añoTransformado = añoOriginal.split('').map(transformarDigito);
+      const sinPrimerosDos = transformados.slice(0, -4).concat(añoTransformado.slice(2));
+      const sumaFecha = sinPrimerosDos.reduce((acc, n) => acc + n, 0);
+
+      const repeticiones = {};
+      sinPrimerosDos.forEach(n => {
+        repeticiones[n] = (repeticiones[n] || 0) + 1;
+      });
+      const repetidos = Object.keys(repeticiones).filter(k => repeticiones[k] > 1);
+
+      document.getElementById("resultado").innerHTML = `
+        <p><strong>Nombre:</strong> ${nombre}</p>
+        <p><strong>Valores del nombre:</strong> ${nombreCalc.valores.join(' ')}</p>
+        <p><strong>Suma del nombre:</strong> ${nombreCalc.suma}</p>
+        <p><strong>Fecha transformada:</strong> ${transformados.join(' ')}</p>
+        <p><strong>Año transformado:</strong> ${añoTransformado.join(' ')}</p>
+        <p><strong>Resultado final (sin 2 primeros del año):</strong> ${sinPrimerosDos.join(' ')}</p>
+        <p><strong>Suma de la fecha:</strong> ${sumaFecha}</p>
+        <p><strong>Números que se repiten:</strong> ${repetidos.join(', ') || 'Ninguno'}</p>
+      `;
+
+      mostrarEnArbol({
+        Keter: nombreCalc.suma,
+        Jojma: transformados[0],
+        Bina: transformados[1],
+        Jesed: parseInt(repetidos[0] || 0),
+        Gebura: parseInt(repetidos[1] || sumaFecha),
+        Tiferet: sumaFecha,
+        Netzaj: transformados[2],
+        Hod: transformados[3],
+        Yesod: transformados[transformados.length - 1],
+        Maljut: Math.round(sumaFecha / sinPrimerosDos.length)
+      });
+    }
+
+    function mostrarEnArbol(valores) {
+      const contenedor = document.getElementById("sefirot");
+      contenedor.innerHTML = '';
+      const posiciones = {
+        Keter: [50, 6], Jojma: [25, 16], Bina: [75, 16],
+        Jesed: [25, 33], Gebura: [75, 33], Tiferet: [50, 46],
+        Netzaj: [25, 63], Hod: [75, 63], Yesod: [50, 75], Maljut: [50, 92]
+      };
+
+      Object.entries(valores).forEach(([sefira, valor]) => {
+        const div = document.createElement("div");
+        div.className = "sefira";
+        div.style.left = posiciones[sefira][0] + '%';
+        div.style.top = posiciones[sefira][1] + '%';
+        div.innerHTML = `<strong>${sefira}</strong><br><span onclick="mostrarTooltip(event, '${sefira}', '${interpretaciones[sefira]}', ${valor})">${valor}</span>`;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function mostrarTooltip(e, sefira, texto, valor) {
+      const tooltip = document.getElementById("tooltip");
+      tooltip.innerHTML = `<strong>${sefira}</strong><br>${texto}<br><em>Valor: ${valor}</em>`;
+      tooltip.style.display = 'block';
+      tooltip.style.left = e.pageX + 'px';
+      tooltip.style.top = e.pageY + 'px';
+
+      setTimeout(() => {
+        tooltip.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
